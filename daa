@@ -1,0 +1,630 @@
+Q1. Quick Sort Using Divide and Conquer
+#include <iostream>
+using namespace std;
+
+void swap(int *a, int *b)
+{
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+
+int partition(int arr[], int low, int high)
+{
+    int pivot = arr[high];
+    int i = low - 1;
+
+    for (int j = low; j < high; j++)
+    {
+        if (arr[j] <= pivot)
+        {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+
+    swap(&arr[i + 1], &arr[high]);
+    return i + 1;
+}
+
+void quickSort(int arr[], int low, int high)
+{
+    if (low < high)
+    {
+        int pi = partition(arr, low, high);
+
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    int arr[n];
+
+    for (int i = 0; i < n; i++)
+        cin >> arr[i];
+
+    quickSort(arr, 0, n - 1);
+
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
+
+    return 0;
+}
+Q2. Strassen's Matrix Multiplication (4×4)
+#include <iostream>
+using namespace std;
+
+void add(int A[2][2], int B[2][2], int C[2][2])
+{
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            C[i][j] = A[i][j] + B[i][j];
+}
+
+void sub(int A[2][2], int B[2][2], int C[2][2])
+{
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            C[i][j] = A[i][j] - B[i][j];
+}
+
+void multiply(int A[2][2], int B[2][2], int C[2][2])
+{
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            C[i][j] = 0;
+            for (int k = 0; k < 2; k++)
+                C[i][j] += A[i][k] * B[k][j];
+        }
+    }
+}
+
+int main()
+{
+    int A[4][4], B[4][4], C[4][4];
+
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            cin >> A[i][j];
+
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            cin >> B[i][j];
+
+    int A11[2][2], A12[2][2], A21[2][2], A22[2][2];
+    int B11[2][2], B12[2][2], B21[2][2], B22[2][2];
+
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            A11[i][j] = A[i][j];
+            A12[i][j] = A[i][j + 2];
+            A21[i][j] = A[i + 2][j];
+            A22[i][j] = A[i + 2][j + 2];
+
+            B11[i][j] = B[i][j];
+            B12[i][j] = B[i][j + 2];
+            B21[i][j] = B[i + 2][j];
+            B22[i][j] = B[i + 2][j + 2];
+        }
+    }
+
+    int M1[2][2], M2[2][2], M3[2][2], M4[2][2];
+    int M5[2][2], M6[2][2], M7[2][2];
+    int T1[2][2], T2[2][2];
+
+    add(A11, A22, T1);
+    add(B11, B22, T2);
+    multiply(T1, T2, M1);
+
+    add(A21, A22, T1);
+    multiply(T1, B11, M2);
+
+    sub(B12, B22, T2);
+    multiply(A11, T2, M3);
+
+    sub(B21, B11, T2);
+    multiply(A22, T2, M4);
+
+    add(A11, A12, T1);
+    multiply(T1, B22, M5);
+
+    sub(A21, A11, T1);
+    add(B11, B12, T2);
+    multiply(T1, T2, M6);
+
+    sub(A12, A22, T1);
+    add(B21, B22, T2);
+    multiply(T1, T2, M7);
+
+    int C11[2][2], C12[2][2], C21[2][2], C22[2][2];
+
+    add(M1, M4, T1);
+    sub(T1, M5, T2);
+    add(T2, M7, C11);
+
+    add(M3, M5, C12);
+
+    add(M2, M4, C21);
+
+    sub(M1, M2, T1);
+    add(T1, M3, T2);
+    add(T2, M6, C22);
+
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            C[i][j] = C11[i][j];
+            C[i][j + 2] = C12[i][j];
+            C[i + 2][j] = C21[i][j];
+            C[i + 2][j + 2] = C22[i][j];
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+            cout << C[i][j] << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+Q3. Warshall's Algorithm (Transitive Closure)
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void warshall(vector<vector<int>> &graph, int n)
+{
+    vector<vector<int>> dist = graph;
+
+    for (int k = 0; k < n; k++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                dist[i][j] = dist[i][j] || (dist[i][k] && dist[k][j]);
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cout << dist[i][j];
+            if (j != n - 1)
+                cout << " ";
+        }
+        cout << endl;
+    }
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<vector<int>> graph(n, vector<int>(n));
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            cin >> graph[i][j];
+
+    warshall(graph, n);
+
+    return 0;
+}          Q4. Floyd–Warshall Algorithm (All Pairs Shortest Path)
+#include <iostream>
+#include <vector>
+using namespace std;
+
+#define INF 1000000000
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<vector<int>> D(n, vector<int>(n));
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> D[i][j];
+            if (D[i][j] == -1 && i != j)
+                D[i][j] = INF;
+        }
+    }
+
+    for (int k = 0; k < n; k++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (D[i][k] < INF && D[k][j] < INF)
+                {
+                    if (D[i][j] > D[i][k] + D[k][j])
+                        D[i][j] = D[i][k] + D[k][j];
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (D[i][j] == INF)
+                cout << "INF";
+            else
+                cout << D[i][j];
+
+            if (j != n - 1)
+                cout << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+Q5. Traveling Salesman Problem (Using Permutations)
+#include <iostream>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+int n;
+int cost[20][20];
+
+int min_cost = INT_MAX;
+
+void tsp(int arr[], int l, int r)
+{
+    if (l == r)
+    {
+        int current_cost = 0;
+        int k = 0;
+
+        for (int i = 0; i <= r; i++)
+        {
+            current_cost += cost[k][arr[i]];
+            k = arr[i];
+        }
+
+        current_cost += cost[k][0];
+
+        min_cost = min(min_cost, current_cost);
+        return;
+    }
+
+    for (int i = l; i <= r; i++)
+    {
+        swap(arr[l], arr[i]);
+        tsp(arr, l + 1, r);
+        swap(arr[l], arr[i]);
+    }
+}
+
+int main()
+{
+    cin >> n;
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            cin >> cost[i][j];
+
+    int arr[20];
+
+    for (int i = 1; i < n; i++)
+        arr[i - 1] = i;
+
+    tsp(arr, 0, n - 2);
+
+    cout << min_cost << endl;
+
+    return 0;
+}
+Q6. Fractional Knapsack (Greedy Method)
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Item
+{
+    int profit;
+    int weight;
+    double ratio;
+};
+
+bool compare(Item a, Item b)
+{
+    return a.ratio > b.ratio;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<Item> items(n);
+
+    for (int i = 0; i < n; i++)
+    {
+        cin >> items[i].profit >> items[i].weight;
+        items[i].ratio = (double)items[i].profit / items[i].weight;
+    }
+
+    int capacity;
+    cin >> capacity;
+
+    sort(items.begin(), items.end(), compare);
+
+    double maxProfit = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        if (capacity >= items[i].weight)
+        {
+            capacity -= items[i].weight;
+            maxProfit += items[i].profit;
+        }
+        else
+        {
+            maxProfit += items[i].ratio * capacity;
+            break;
+        }
+    }
+
+    if (maxProfit == (int)maxProfit)
+        cout << (int)maxProfit;
+    else
+        cout << maxProfit;
+
+    return 0;
+}      .....Q7. Dijkstra's Algorithm
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<vector<int>> cost(n, vector<int>(n));
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+            if (i != j && cost[i][j] == 0)
+                cost[i][j] = INT_MAX;
+        }
+    }
+
+    int source;
+    cin >> source;
+    source--;
+
+    vector<int> dist(n, INT_MAX);
+    vector<bool> visited(n, false);
+
+    dist[source] = 0;
+
+    for (int count = 0; count < n - 1; count++)
+    {
+        int u = -1;
+        int minDist = INT_MAX;
+
+        for (int i = 0; i < n; i++)
+        {
+            if (!visited[i] && dist[i] < minDist)
+            {
+                minDist = dist[i];
+                u = i;
+            }
+        }
+
+        if (u == -1)
+            break;
+
+        visited[u] = true;
+
+        for (int v = 0; v < n; v++)
+        {
+            if (!visited[v] &&
+                cost[u][v] != INT_MAX &&
+                dist[u] != INT_MAX &&
+                dist[u] + cost[u][v] < dist[v])
+            {
+                dist[v] = dist[u] + cost[u][v];
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (i == source)
+            continue;
+
+        if (dist[i] == INT_MAX)
+            cout << source + 1 << "->" << i + 1 << " cost=-1" << endl;
+        else
+            cout << source + 1 << "->" << i + 1 << " cost=" << dist[i] << endl;
+    }
+
+    return 0;
+}
+Q8. Kruskal's Algorithm
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Edge
+{
+    int u, v, weight;
+
+    bool operator<(const Edge &other) const
+    {
+        return weight < other.weight;
+    }
+};
+
+vector<int> parent;
+
+int findSet(int i)
+{
+    if (parent[i] == i)
+        return i;
+
+    return parent[i] = findSet(parent[i]);
+}
+
+void unionSets(int i, int j)
+{
+    int root_i = findSet(i);
+    int root_j = findSet(j);
+
+    if (root_i != root_j)
+        parent[root_i] = root_j;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<Edge> edges;
+
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= n; j++)
+        {
+            int weight;
+            cin >> weight;
+
+            if (j > i && weight != 0)
+                edges.push_back({i, j, weight});
+        }
+    }
+
+    sort(edges.begin(), edges.end());
+
+    parent.resize(n + 1);
+
+    for (int i = 1; i <= n; i++)
+        parent[i] = i;
+
+    int min_cost = 0;
+    int edge_count = 0;
+
+    for (auto edge : edges)
+    {
+        if (findSet(edge.u) != findSet(edge.v))
+        {
+            edge_count++;
+
+            cout << edge_count << " edge ("
+                 << edge.u << "," << edge.v
+                 << ")=" << edge.weight << endl;
+
+            min_cost += edge.weight;
+
+            unionSets(edge.u, edge.v);
+
+            if (edge_count == n - 1)
+                break;
+        }
+    }
+
+    cout << "Minimum cost=" << min_cost << endl;
+
+    return 0;
+}
+Q9. N-Queens Using Backtracking
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int N;
+int solutionCount = 0;
+vector<vector<string>> board;
+
+bool isSafe(int row, int col)
+{
+    for (int i = 0; i < row; i++)
+        if (board[i][col] == "Q")
+            return false;
+
+    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--)
+        if (board[i][j] == "Q")
+            return false;
+
+    for (int i = row, j = col; i >= 0 && j < N; i--, j++)
+        if (board[i][j] == "Q")
+            return false;
+
+    return true;
+}
+
+void solveNQueens(int row)
+{
+    if (row == N)
+    {
+        solutionCount++;
+
+        cout << "Solution " << solutionCount << ":" << endl;
+
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+                cout << board[i][j] << " ";
+
+            cout << endl;
+        }
+
+        return;
+    }
+
+    for (int col = 0; col < N; col++)
+    {
+        if (isSafe(row, col))
+        {
+            board[row][col] = "Q";
+            solveNQueens(row + 1);
+            board[row][col] = "*";
+        }
+    }
+}
+
+int main()
+{
+    cin >> N;
+
+    board.assign(N, vector<string>(N, "*"));
+
+    solveNQueens(0);
+
+    cout << "Total solutions = " << solutionCount << endl;
+
+    return 0;
+}
